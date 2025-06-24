@@ -26,7 +26,7 @@ public class NavGraphManager : MonoBehaviour
         }
 
         var closest = allNodes.OrderBy(n => Vector3.Distance(n.transform.position, position)).FirstOrDefault();
-        Debug.Log($"[NavGraphManager] Nearest node to {position} is {closest?.name}");
+        //Debug.Log($"[NavGraphManager] Nearest node to {position} is {closest?.name}");
         return closest;
     }
 
