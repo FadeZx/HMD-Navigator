@@ -44,8 +44,14 @@ public class AttractionController : MonoBehaviour
         if (destinationTitleTMP != null && destinationNode != null)
         {
             destinationTitleTMP.text = destinationNode.nodeID;
-            popupTitleTMP.text = destinationNode.nodeID;
+           
         }
+        if (popupTitleTMP != null && popupTitleTMP != null)
+        {
+            popupTitleTMP.text = destinationNode.nodeID;
+
+        }
+        
 
         if (attractionImageDisplay != null && attractionTexture != null)
         {
@@ -87,6 +93,7 @@ public class AttractionController : MonoBehaviour
 
     public void SetThisDestination()
     {
+        isActivated = true;
         NavigationPopup navPopup = FindFirstObjectByType<NavigationPopup>();
         if (navPopup == null)
         {
@@ -94,7 +101,7 @@ public class AttractionController : MonoBehaviour
             return;
         }
         navPopup.SetDestination(destinationNode);
-        //navPopup.ConfirmNavigation();
+      
 
         if (mapPin != null)
             mapPin.SetActive(true);
@@ -108,7 +115,18 @@ public class AttractionController : MonoBehaviour
         if (confirmPanel != null)
             confirmPanel.SetActive(true);
 
-         
+        if (popupTitleTMP != null && popupTitleTMP != null)
+        {
+            popupTitleTMP.text = destinationNode.nodeID;
+        }
+
+
+        if (attractionImageDisplay != null && attractionTexture != null)
+        {
+            attractionImageDisplay.texture = attractionTexture;
+        }
+
+
 
 
         if (soundEffect != null)

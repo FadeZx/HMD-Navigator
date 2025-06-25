@@ -68,7 +68,7 @@ public class NavigationPopup : MonoBehaviour
 
     public void Cancel()
     {
-        gameObject.SetActive(false);
+        //gameObject.SetActive(false);
         visualizer.ClearPath();
         pendingDestination = null;
     }
