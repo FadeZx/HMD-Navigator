@@ -2,6 +2,7 @@
 using TMPro;
 using System.Data; // Don't forget this for TextMeshPro
 using UnityEngine.UI;
+using System.Collections;
 
 public class AttractionController : MonoBehaviour
 {
@@ -71,24 +72,31 @@ public class AttractionController : MonoBehaviour
         isActivated = false;
 
         if (pinAnimator != null)
-            pinAnimator.SetBool("isActive",false);
+            pinAnimator.SetBool("isActive", false);
 
-        if (confirmPanel != null)
-            confirmPanel.SetActive(false);
         if (mapPin != null)
             mapPin.SetActive(false);
 
         NavigationPopup navPopup = FindFirstObjectByType<NavigationPopup>();
-        if (navPopup == null)
-        {
-            Debug.LogError("No NavigationPopup found in scene.");
-            return;
-        }
-        navPopup.Cancel();
-        confirmPanel.SetActive(false);
-        destinationButton.SetActive(true);
+        if (navPopup != null)
+            navPopup.Cancel();
+
         if (soundEffect != null)
             soundEffect.Play();
+
+        // Delay the panel deactivation by one frame
+        StartCoroutine(DeferredCancelPanel());
+    }
+
+    private IEnumerator DeferredCancelPanel()
+    {
+        yield return null; // Wait 1 frame to let hover system settle
+
+        if (confirmPanel != null)
+            confirmPanel.SetActive(false);
+
+        if (destinationButton != null)
+            destinationButton.SetActive(true);
     }
 
     public void SetThisDestination()
@@ -106,7 +114,7 @@ public class AttractionController : MonoBehaviour
         if (mapPin != null)
             mapPin.SetActive(true);
 
-        if (pinAnimator != null)
+        if (pinAnimator != null)    
             pinAnimator.SetBool("isActive", true);
 
         if (destinationButton != null)

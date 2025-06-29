@@ -2102,15 +2102,36 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1287159418}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f7a51791762924c4eacba4f0dc5fe464, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   hand: {fileID: 1133060619}
   pinchThreshold: 0.8
+  palmThreshold: 0.85
   requirePalmOpen: 1
-  onPinchAction:
+  holdDuration: 0.5
+  doublePinchInterval: 0.5
+  onSinglePinch:
+    m_PersistentCalls:
+      m_Calls: []
+  onHoldPinch:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1287159420}
+        m_TargetAssemblyTypeName: MapController, Assembly-CSharp
+        m_MethodName: ToggleMap
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onDoublePinch:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1287159420}
@@ -2140,7 +2161,7 @@ MonoBehaviour:
   map: {fileID: 1576900444}
   userHand: {fileID: 388696822}
   animationDuration: 0.4
-  hiddenScale: {x: 0, y: 0, z: 0}
+  hiddenScale: {x: 0.0001, y: 0.0001, z: 0.0001}
 --- !u!4 &1287159421
 Transform:
   m_ObjectHideFlags: 0
@@ -3712,6 +3733,10 @@ PrefabInstance:
       propertyPath: m_LocalScale.y
       value: 0.31
       objectReference: {fileID: 0}
+    - target: {fileID: 783532045318762315, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1272228089709527715, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -3775,18 +3800,6 @@ PrefabInstance:
     - target: {fileID: 1527647934826696098, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
       propertyPath: m_SizeDelta.y
       value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 1527647934826696098, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.98671305
-      objectReference: {fileID: 0}
-    - target: {fileID: 1527647934826696098, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.1883078
-      objectReference: {fileID: 0}
-    - target: {fileID: 1527647934826696098, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.85398394
       objectReference: {fileID: 0}
     - target: {fileID: 1527647934826696098, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4235,6 +4248,18 @@ PrefabInstance:
     - target: {fileID: 4098661142717162831, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4107835547515437626, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
+      propertyPath: m_Colors.m_SelectedColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4107835547515437626, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
+      propertyPath: m_Colors.m_SelectedColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4107835547515437626, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
+      propertyPath: m_Colors.m_SelectedColor.r
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4171430478116450534, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
       propertyPath: m_AnchorMax.y
@@ -4692,10 +4717,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7996302269344294579, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
-      propertyPath: popupTitleTMP
+    - target: {fileID: 7903344719129139215, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
+      propertyPath: m_Material
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 2100000, guid: 2c59325cff8447d47899d7e518a87833, type: 2}
     - target: {fileID: 7996302269344294579, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
       propertyPath: attractionImage
       value: 
@@ -4758,7 +4783,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8319788063386523348, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 2.88
+      value: 5.58
       objectReference: {fileID: 0}
     - target: {fileID: 8446168062350527186, guid: 2cf859480e9a6284b97f8db6a5d57733, type: 3}
       propertyPath: m_SizeDelta.x
