@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using DG.Tweening;
 
 public class MapController : MonoBehaviour
@@ -22,10 +22,20 @@ public class MapController : MonoBehaviour
             return;
         }
 
-        lastVisibleScale = map.transform.localScale; // Store initial scale
-        isOpen = true;
+        lastVisibleScale = map.transform.localScale; // Store original intended visible scale
+
+        // Delay hiding slightly to avoid overwriting scale too early
+        Invoke(nameof(ForceCloseMapAtStart), 0.1f);
     }
 
+    private void ForceCloseMapAtStart()
+    {
+        map.transform.localScale = hiddenScale;
+        map.SetActive(false);
+        isOpen = false;
+    }
+
+        
     public void ToggleMap()
     {
         if (map == null || userHand == null) return;

@@ -30,8 +30,23 @@ public class NavGraphManager : MonoBehaviour
         return closest;
     }
 
+    public float GetPathWeight(List<NavNode> path)
+    {
+        float total = 0f;
+        for (int i = 0; i < path.Count - 1; i++)
+        {
+            var from = path[i];
+            var to = path[i + 1];
+            var edge = from.connections.Find(e => e.target == to);
+            if (edge != null)
+            {
+                total += edge.weight;
+            }
+        }
+        return total;
+    }
 
-    // ✅ Dijkstra's Algorithm
+    //  Dijkstra's Algorithm
     public List<NavNode> FindPath(NavNode start, NavNode goal)
     {
         if (!allNodes.Contains(start)) Debug.LogError($"[FindPath] Start node '{start?.name}' not in allNodes!");
