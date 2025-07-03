@@ -51,7 +51,22 @@ public class AttractionController : MonoBehaviour
 
     public void ConfirmNavigation()
     {
-        // Optional future logic
+        isActivated = false;
+        if (confirmPanel != null)
+            confirmPanel.SetActive(false);
+
+        NavigationPopup navPopup = FindFirstObjectByType<NavigationPopup>();
+        if (navPopup == null)
+        {
+            Debug.LogError("No NavigationPopup found in scene.");
+            return;
+        }
+        navPopup.ConfirmNavigation();
+        confirmPanel.SetActive(false);
+        destinationButton.SetActive(true);
+
+        if (soundEffect != null)
+            soundEffect.Play();
     }
 
     public void CancelNavigation()
@@ -124,7 +139,7 @@ public class AttractionController : MonoBehaviour
     {
         if (distanceText == null || timeText == null || destinationNode == null)
             return;
-
+  
         NavigationPopup navPopup = FindFirstObjectByType<NavigationPopup>();
         NavGraphManager navGraph = FindFirstObjectByType<NavGraphManager>();
         if (navPopup == null || navGraph == null)
@@ -151,8 +166,8 @@ public class AttractionController : MonoBehaviour
         }
 
         float totalWeight = navGraph.GetPathWeight(path);
-        float meters = totalWeight / navPopup.mapUnitsPerMeter;
-        float timeSeconds = meters / navPopup.walkSpeedMetersPerSecond;
+        float meters = totalWeight / NavConfig.Instance.mapUnitsPerMeter;
+        float timeSeconds = meters / NavConfig.Instance.walkSpeed;
 
         int mins = Mathf.FloorToInt(timeSeconds / 60);
 

@@ -12,16 +12,19 @@ public class NavigationPopup : MonoBehaviour
     float pathWeight = 0f;
     public NavNode initDest;
 
-    [Header("Path Calculation Settings")]
-    public float walkSpeedMetersPerSecond = 1.2f;  // You can tune this in Inspector
-    public float mapUnitsPerMeter = 1.0f;          // 1 unit = 1 meter by default
+    [Header("Path Calculation ")]
+    private float walkSpeedMetersPerSecond;  // You can tune this in Inspector
+    private float mapUnitsPerMeter;
 
-    public GameObject overlayArrow;
+
+    // public GameObject overlayArrow;  ❌ remove this
+    public UserNavigationVisualizer userVisualizer; // ✅ Add this instead
 
     private void Start()
     {
-        // Optional: Start navigation after delay for testing
-        //StartCoroutine(InitNavigationAfterDelay(5f));
+       
+
+
     }
 
     private IEnumerator InitNavigationAfterDelay(float delay)
@@ -36,6 +39,9 @@ public class NavigationPopup : MonoBehaviour
     /// </summary>
     public void SetDestination(NavNode destination)
     {
+
+        mapUnitsPerMeter = NavConfig.Instance.mapUnitsPerMeter;
+        walkSpeedMetersPerSecond = NavConfig.Instance.walkSpeed;
         pendingDestination = destination;
 
         Vector3 userWorldPos = userTracker.transform.position;
@@ -47,9 +53,12 @@ public class NavigationPopup : MonoBehaviour
             return;
         }
 
+
+        float scale = NavConfig.Instance.mapUnitsPerMeter;
+
         // Calculate scaled distance from user to nearest node
         float unityDistance = Vector3.Distance(userWorldPos, nearestNode.transform.position);
-        float scaledWeight = unityDistance * mapUnitsPerMeter;
+        float scaledWeight = unityDistance * scale;
 
         // Create virtual node (only for pathfinding)
         NavNode virtualStart = new GameObject("VirtualStartNode").AddComponent<NavNode>();
@@ -106,21 +115,58 @@ public class NavigationPopup : MonoBehaviour
 
         Debug.Log($"[NavigationPopup] Confirmed navigation to {pendingDestination.name}");
 
-        // ✅ Show overlay arrow
-        if (overlayArrow != null)
-            overlayArrow.SetActive(true);
+        // ✅ Redo the path to get final data
+        Vector3 userWorldPos = userTracker.transform.position;
+        NavNode nearestNode = navGraph.FindNearestNode(userWorldPos);
+        float unityDistance = Vector3.Distance(userWorldPos, nearestNode.transform.position);
+        mapUnitsPerMeter = NavConfig.Instance.mapUnitsPerMeter;
+        float scaledWeight = unityDistance * mapUnitsPerMeter;
+
+        // Recreate virtual node
+        NavNode virtualStart = new GameObject("VirtualStartNode").AddComponent<NavNode>();
+        virtualStart.transform.position = userWorldPos;
+        virtualStart.nodeID = "UserPosition";
+        virtualStart.manualConnections.Clear();
+        virtualStart.connections.Clear();
+        var edgeToNearest = new NavEdge(nearestNode, scaledWeight);
+        virtualStart.manualConnections.Add(edgeToNearest);
+        virtualStart.UseManualConnections();
+        navGraph.allNodes.Add(virtualStart);
+
+        List<NavNode> fullPath = navGraph.FindPath(virtualStart, pendingDestination);
+        fullPath.Insert(0, virtualStart); // Insert virtual start
+
+        // ✅ Draw real-world path using userVisualizer
+        if (userVisualizer != null)
+        {
+            userVisualizer.worldScaleMultiplier = 1f / mapUnitsPerMeter; // 🔁 Auto set scale
+            Vector3 userNodeForward = userTracker.GetCurrentNode().transform.forward;
+            userVisualizer.worldScaleMultiplier = 1f / mapUnitsPerMeter; // keep this
+            userVisualizer.ShowWorldPath(fullPath, userWorldPos, userNodeForward);
+
+
+        }
+
+
+
+        navGraph.allNodes.Remove(virtualStart);
+        Destroy(virtualStart.gameObject);
 
         // ✅ Close map
-        MapController mapController = FindFirstObjectByType<MapController>();
+        MapController mapController = FindAnyObjectByType<MapController>(FindObjectsInactive.Include);
+
         if (mapController != null)
-            mapController.CloseMap();
+            mapController.ToggleMap();
     }
+
 
 
     public void Cancel()
     {
-        visualizer.ClearPath(); // ✅ This already clears the path
+        visualizer.ClearPath();       // ✅ Clears the map path
+        userVisualizer?.ClearPath();  // ✅ Also clear the real-world path if it exists
         pendingDestination = null;
     }
+
 
 }
