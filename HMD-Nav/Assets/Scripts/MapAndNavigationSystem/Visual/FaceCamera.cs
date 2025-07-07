@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class BillboardFaceCamera : MonoBehaviour
 {
+    [Tooltip("If true, X-axis (tilt) will be fixed and the object won't tilt up/down to face the camera.")]
+    public bool lockXRotation = true;
+
     private Vector3 initialScale;
 
     void Start()
@@ -13,16 +16,18 @@ public class BillboardFaceCamera : MonoBehaviour
     {
         if (Camera.main == null) return;
 
-        // Point the object toward the camera
         Vector3 directionToCamera = Camera.main.transform.position - transform.position;
-        directionToCamera.y = 0f; // Optional: Lock vertical axis to avoid tilting
+
+        if (lockXRotation)
+        {
+            directionToCamera.y = 0f; // Keep vertical rotation fixed
+        }
 
         if (directionToCamera != Vector3.zero)
         {
-            transform.rotation = Quaternion.LookRotation(-directionToCamera);
+            transform.rotation = Quaternion.LookRotation(-directionToCamera.normalized);
         }
 
-        // Restore original scale (in case rotation messed it up)
         transform.localScale = initialScale;
     }
 }

@@ -23,6 +23,11 @@ public class NavNode : MonoBehaviour
 
     [HideInInspector] public List<NavEdge> connections = new List<NavEdge>();
 
+
+    [Header("Edit Mode Visual")]
+    public bool isEditMode = false;                   // You toggle this manually in Inspector
+    public MeshRenderer nodeVisual;                   // As
+
     private void Awake()
     {
         if (string.IsNullOrEmpty(nodeID))
@@ -50,6 +55,20 @@ public class NavNode : MonoBehaviour
         }
 #endif
     }
+    private void UpdateEditVisual()
+    {
+        if (nodeVisual != null)
+        {
+            nodeVisual.enabled = isEditMode;
+        }
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        UpdateEditVisual();
+    }
+#endif
 
     public void UseManualConnections()
     {

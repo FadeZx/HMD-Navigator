@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/NavigationMode_Scene.unity
+    guid: cdbaa81b55fe7c546bb1663cac2e1ff5
+  - enabled: 1
+    path: Assets/Scenes/EditMode_Scene.unity
+    guid: e1745fb1526b5c148a29914b814f1680
+  - enabled: 0
     path: Assets/Scenes/MetaGPS_TestScene.unity
     guid: ca68d773bbe5b994aaf20330cca697c3
   - enabled: 0
