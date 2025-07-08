@@ -77,4 +77,17 @@ public class MapController : MonoBehaviour
 
         isOpen = false;
     }
+
+    /// <summary>
+    /// Resets the map's position to the user's wrist using DOTween.
+    /// Useful in case the map has drifted or been moved.
+    /// </summary>
+    public void ResetMapPosition()
+    {
+        if (map == null || userHand == null) return;
+
+        map.transform.DOMove(userHand.position, animationDuration);
+
+    }
+
 }

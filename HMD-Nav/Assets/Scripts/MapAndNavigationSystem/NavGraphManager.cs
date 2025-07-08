@@ -13,11 +13,21 @@ public class NavGraphManager : MonoBehaviour
             allNodes = FindObjectsByType<NavNode>(FindObjectsSortMode.None).ToList();
             Debug.Log($"[NavGraphManager] Found {allNodes.Count} NavNodes");
         }
+
+        // ✅ Force refresh bidirectional links + connection lists
+        foreach (var node in allNodes)
+        {
+            node.EnsureBidirectionalConnections();
+            node.UseManualConnections();
+            if (node.connections.Count == 0)
+                Debug.LogWarning($"[NavGraph] Node '{node.name}' has no connections!");
+        }
     }
 
 
 
-    public NavNode FindNearestNode(Vector3 position)
+
+public NavNode FindNearestNode(Vector3 position)
     {
         if (allNodes == null || allNodes.Count == 0)
         {
