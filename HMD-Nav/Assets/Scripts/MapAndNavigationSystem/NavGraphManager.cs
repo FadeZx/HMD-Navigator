@@ -1,20 +1,23 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Collections;
 
 public class NavGraphManager : MonoBehaviour
 {
     public List<NavNode> allNodes;
 
-    void Start()
+    IEnumerator Start()
     {
+        // Wait one frame to let all NavNodes be active
+        yield return null;
+
         if (allNodes == null || allNodes.Count == 0)
         {
             allNodes = FindObjectsByType<NavNode>(FindObjectsSortMode.None).ToList();
             Debug.Log($"[NavGraphManager] Found {allNodes.Count} NavNodes");
         }
 
-        // ✅ Force refresh bidirectional links + connection lists
         foreach (var node in allNodes)
         {
             node.EnsureBidirectionalConnections();
@@ -27,7 +30,8 @@ public class NavGraphManager : MonoBehaviour
 
 
 
-public NavNode FindNearestNode(Vector3 position)
+
+    public NavNode FindNearestNode(Vector3 position)
     {
         if (allNodes == null || allNodes.Count == 0)
         {
@@ -115,7 +119,7 @@ public NavNode FindNearestNode(Vector3 position)
         }
         if (path.Count == 0)
         {
-            Debug.LogWarning($"[FindPath] No valid path reconstructed from {start?.name} to {goal?.name}");
+            Debug.LogWarning($"[FindPath] No valid path reconstructed from {start?.nodeID} to {goal?.nodeID}");
         }
 
 

@@ -6,6 +6,8 @@ public class PathVisualizer : MonoBehaviour
 {
     public LineRenderer lineRenderer;
     private List<NavNode> currentPath = new List<NavNode>();
+    public Transform userTracker;
+
 
 
     void Start()
@@ -57,14 +59,22 @@ public class PathVisualizer : MonoBehaviour
 
     private void UpdateLine()
     {
+        if (lineRenderer.positionCount != currentPath.Count + 1)
+            lineRenderer.positionCount = currentPath.Count + 1;
+
         Transform mapTransform = transform;
+
+        // Keep index 0 = user's world position
+        Vector3 userStart = userTracker.transform.position + Vector3.up * 0.005f;
+        lineRenderer.SetPosition(0, mapTransform.InverseTransformPoint(userStart));
 
         for (int i = 0; i < currentPath.Count; i++)
         {
             Vector3 worldPos = currentPath[i].transform.position + Vector3.up * 0.005f;
-            lineRenderer.SetPosition(i, mapTransform.InverseTransformPoint(worldPos));
+            lineRenderer.SetPosition(i + 1, mapTransform.InverseTransformPoint(worldPos));
         }
     }
+
 
 
     public void ClearPath()

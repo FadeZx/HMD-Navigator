@@ -10,7 +10,6 @@ public class NavigationPopup : MonoBehaviour
     public PathVisualizer visualizer;
 
     private NavNode pendingDestination;
-    float pathWeight = 0f;
     public NavNode initDest;
 
     [Header("Path Calculation ")]
@@ -68,8 +67,11 @@ public class NavigationPopup : MonoBehaviour
         if (userVisualizer != null)
         {
             userVisualizer.worldScaleMultiplier = 1f / mapUnitsPerMeter;
-            Vector3 userNodeForward = userTracker.GetCurrentNode().transform.forward;
+            Vector3 userNodeForward = userTracker.transform.forward; // ✅ direction of the userNode (not nav node)
+
             userVisualizer.ShowWorldPath(fullPath, userWorldPos, userNodeForward);
+
+
         }
 
         float meters = totalWeight / mapUnitsPerMeter;
@@ -111,8 +113,12 @@ public class NavigationPopup : MonoBehaviour
         if (userVisualizer != null)
         {
             userVisualizer.worldScaleMultiplier = 1f / mapUnitsPerMeter;
-            Vector3 userNodeForward = userTracker.GetCurrentNode().transform.forward;
-            userVisualizer.ShowWorldPath(fullPath, userWorldPos, userNodeForward);
+            // Fix: pass map-space forward direction from userNode
+            Vector3 userMapForward = userTracker.transform.forward;
+            Vector3 userWorldForward = userTracker.transform.parent.TransformDirection(userMapForward); // ⬅️ convert to world space
+
+            userVisualizer.ShowWorldPath(fullPath, userWorldPos, userWorldForward);
+
         }
 
         // ✅ Close map
