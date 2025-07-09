@@ -31,6 +31,7 @@ public class MarkerController : MonoBehaviour
         {
             gameObject.SetActive(true);
         }
+
     }
 
     // Update is called once per frame
@@ -41,9 +42,9 @@ public class MarkerController : MonoBehaviour
             _textMesh.transform.rotation = Quaternion.LookRotation(_textMesh.transform.position - _camera.transform.position);
         }
 
-        if (gameObject.activeSelf && Time.time - lastUpdateTime > 2f)
-        {
-            gameObject.SetActive(false);
-        }
+        //if (gameObject.activeSelf && Time.time - lastUpdateTime > 2f)
+        //{
+        //    gameObject.SetActive(false);
+        //}
     }
 }

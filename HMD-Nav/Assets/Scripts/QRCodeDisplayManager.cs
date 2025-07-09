@@ -4,7 +4,7 @@ using UnityEngine;
 using Meta.XR;
 using System;
 
-public class QRCodeDisplayManager : MonoBehaviour
+public class QrCodeDisplayManager : MonoBehaviour
 {
 
     [SerializeField] private QRCodeScanner scanner;
@@ -13,6 +13,8 @@ public class QRCodeDisplayManager : MonoBehaviour
     private readonly Dictionary<string, MarkerController> _activeMarkers = new();
     private WebCamTextureManager _webCamTextureManager;
     private PassthroughCameraEye _passthroughCameraEye;
+
+    private readonly HashSet<string> _lockedMarkers = new();
 
     private enum QrRaycastMode
     {
@@ -28,7 +30,6 @@ public class QRCodeDisplayManager : MonoBehaviour
         _passthroughCameraEye = _webCamTextureManager.Eye;
     }
 
-    // Update is called once per frame
     private void Update()
     {
         UpdateMarkers();
@@ -44,6 +45,10 @@ public class QRCodeDisplayManager : MonoBehaviour
             {
                 continue;
             }
+
+            if (_lockedMarkers.Contains(qrResult.text))
+                continue;
+
 
             var count = qrResult.corners.Length;
             var uvs = new Vector2[count];
@@ -136,6 +141,8 @@ public class QRCodeDisplayManager : MonoBehaviour
                 marker.UpdateMarker(center, poseRot, scale, qrResult.text);
                 _activeMarkers[qrResult.text] = marker;
             }
+
+            _lockedMarkers.Add(qrResult.text);
         }
 
         // Cleanup
@@ -153,5 +160,4 @@ public class QRCodeDisplayManager : MonoBehaviour
             _activeMarkers.Remove(key);
         }
     }
-
 }
