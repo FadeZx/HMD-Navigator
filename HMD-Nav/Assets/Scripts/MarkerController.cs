@@ -6,6 +6,8 @@ public class MarkerController : MonoBehaviour
     private TextMeshProUGUI _textMesh;
     public float lastUpdateTime;
     private Camera _camera;
+    private string _qrText; // Store the QR string for this marker
+
 
     private void Awake()
     {
@@ -23,7 +25,8 @@ public class MarkerController : MonoBehaviour
         transform.localScale = scale;
         if (_textMesh)
         {
-            _textMesh.text = text;
+            //_textMesh.text = text;
+            _qrText = text; // Remember which marker we're showing
         }
 
         lastUpdateTime = Time.time;
@@ -37,10 +40,31 @@ public class MarkerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (_textMesh)
+
+        if (_textMesh == null || _qrText == null) return;
+
+        //label face the camera
+        _textMesh.transform.rotation = Quaternion.LookRotation(_textMesh.transform.position - _camera.transform.position);
+
+        // Get the latest marker data using the stored QR string
+        var markerInfo = QRCodeTracker.Instance.GetMarker(_qrText);
+
+        if (markerInfo != null)
         {
-            _textMesh.transform.rotation = Quaternion.LookRotation(_textMesh.transform.position - _camera.transform.position);
+            float distance = markerInfo.GetDistanceTo(_camera.transform);
+            Vector3 localPos = markerInfo.GetLocalPosition(_camera.transform);
+            // Compose real-time label text (change to whatever format you want!)
+            _textMesh.text = $"Dist: {distance:F2}m\nLocal: {localPos.ToString("F2")}";
         }
+        else
+        {
+            _textMesh.text = "Marker not tracked";
+        }
+
+        //if (_textMesh)
+        //{
+        //    _textMesh.transform.rotation = Quaternion.LookRotation(_textMesh.transform.position - _camera.transform.position);
+        //}
 
         //if (gameObject.activeSelf && Time.time - lastUpdateTime > 2f)
         //{

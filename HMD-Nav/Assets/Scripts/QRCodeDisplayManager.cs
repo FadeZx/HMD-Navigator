@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Meta.XR;
 using PassthroughCameraSamples;
 using UnityEngine;
-using Meta.XR;
-using System;
 
 public class QrCodeDisplayManager : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class QrCodeDisplayManager : MonoBehaviour
     private PassthroughCameraEye _passthroughCameraEye;
 
     private readonly HashSet<string> _lockedMarkers = new();
+    private readonly Dictionary<string, PoseAccumulator> _poseAccumulators = new();
 
     private enum QrRaycastMode
     {
@@ -48,7 +50,6 @@ public class QrCodeDisplayManager : MonoBehaviour
 
             if (_lockedMarkers.Contains(qrResult.text))
                 continue;
-
 
             var count = qrResult.corners.Length;
             var uvs = new Vector2[count];
@@ -120,6 +121,30 @@ public class QrCodeDisplayManager : MonoBehaviour
             var scaleFactor = 1.5f;
             var scale = new Vector3(width * scaleFactor, height * scaleFactor, 1f);
 
+            //Consistency accumulation
+
+            if (!_poseAccumulators.TryGetValue(qrResult.text, out var accumulator))
+            {
+                accumulator = new PoseAccumulator();
+                _poseAccumulators[qrResult.text] = accumulator;
+            }
+            accumulator.Add(center, poseRot);
+
+            const float posVarThreshold = 0.0025f;  // meters^2
+            const float angleVarThreshold = 5f;      // degrees
+
+            if (!accumulator.IsStable(posVarThreshold, angleVarThreshold))
+            {
+                // Optionally, show a preview marker here if you want!
+                continue;
+            }
+
+            // Use averaged pose for extra smoothness:
+            center = accumulator.MeanPosition;
+            poseRot = accumulator.MeanRotation;
+
+
+
             if (_activeMarkers.TryGetValue(qrResult.text, out var marker))
             {
                 marker.UpdateMarker(center, poseRot, scale, qrResult.text);
@@ -143,6 +168,9 @@ public class QrCodeDisplayManager : MonoBehaviour
             }
 
             _lockedMarkers.Add(qrResult.text);
+            _poseAccumulators.Remove(qrResult.text);
+            QRCodeTracker.Instance.RegisterOrUpdateMarker(qrResult.text, center, poseRot);
+
         }
 
         // Cleanup
@@ -160,4 +188,51 @@ public class QrCodeDisplayManager : MonoBehaviour
             _activeMarkers.Remove(key);
         }
     }
+}
+
+
+// Helper class to store and evaluate recent pose detections
+class PoseAccumulator
+{
+
+    const int MaxSamples = 10;    //recent detections to consider
+    readonly Queue<Vector3> positions = new();
+    readonly Queue<Quaternion> rotations = new();
+
+    public void Add(Vector3 pos, Quaternion rot)
+    {
+        if (positions.Count == MaxSamples) positions.Dequeue();
+        if (rotations.Count == MaxSamples) rotations.Dequeue();
+        positions.Enqueue(pos);
+        rotations.Enqueue(rot);
+    }
+
+    public bool IsStable(float positionThreshold, float angleThreshold)
+    {
+        if (positions.Count < MaxSamples) return false;
+
+        // Position variance
+        Vector3 mean = positions.Aggregate(Vector3.zero, (a, b) => a + b) / positions.Count;
+        float posVariance = positions.Average(p => (p - mean).sqrMagnitude);
+
+        // Angle variance (relative to the mean)
+        Quaternion meanRot = rotations.First(); // Simple approx
+        float angleVariance = rotations.Average(r => Quaternion.Angle(r, meanRot));
+
+        return posVariance < positionThreshold && angleVariance < angleThreshold;
+    }
+
+    public Vector3 MeanPosition => positions.Aggregate(Vector3.zero, (a, b) => a + b) / positions.Count;
+    public Quaternion MeanRotation
+    {
+        get
+        {
+            // For simplicity, just return the last rotation
+            // For more accuracy, use SLERP to average quaternions (advanced)
+            return rotations.Last();
+        }
+
+    }
+
+
 }
