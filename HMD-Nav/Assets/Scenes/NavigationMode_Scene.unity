@@ -844,6 +844,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   userTransform: {fileID: 119046188}
+  mapRootTransform: {fileID: 540999068}
   navGraph: {fileID: 1576900451}
   directionIndicator: {fileID: 1660169775}
   Indicatoroffset: 1
@@ -2919,8 +2920,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 1517185430}
   userOrigin: {fileID: 1703213335}
-  verticalOffset: 0
+  verticalOffset: 0.5
   worldScaleMultiplier: 2
+  manualRotationOffset: 0
 --- !u!120 &1517185430
 LineRenderer:
   serializedVersion: 2
@@ -3382,6 +3384,7 @@ MonoBehaviour:
   navGraph: {fileID: 1576900451}
   userTracker: {fileID: 119046192}
   visualizer: {fileID: 1576900452}
+  mapRootTransform: {fileID: 540999068}
   initDest: {fileID: 0}
   userVisualizer: {fileID: 1517185429}
 --- !u!1 &1622390212

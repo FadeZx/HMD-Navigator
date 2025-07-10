@@ -8,6 +8,7 @@ public class NavigationPopup : MonoBehaviour
     public NavGraphManager navGraph;
     public UserLocationTracker userTracker;
     public PathVisualizer visualizer;
+    public Transform mapRootTransform; // The rotating map (userNode's parent)
 
     private NavNode pendingDestination;
     public NavNode initDest;
@@ -67,12 +68,26 @@ public class NavigationPopup : MonoBehaviour
         if (userVisualizer != null)
         {
             userVisualizer.worldScaleMultiplier = 1f / mapUnitsPerMeter;
-            Vector3 userNodeForward = userTracker.transform.forward; // ✅ direction of the userNode (not nav node)
 
-            userVisualizer.ShowWorldPath(fullPath, userWorldPos, userNodeForward);
+            // Get raw world forward
+            Vector3 userWorldForward = userTracker.userTransform.forward;
 
+            // Cancel out map rotation to get userNode.forward in map space
+            Quaternion worldToMap = Quaternion.Inverse(mapRootTransform.rotation);
+            Vector3 userForwardInMapSpace = worldToMap * userWorldForward.normalized;
 
+            // Then: align this with world forward
+            userVisualizer.LockRotation(userForwardInMapSpace, userWorldForward);
+
+            // 🛠️ FIXED: define this here
+            Vector3 userNodeWorldPos = userTracker.transform.position;
+
+            userVisualizer.ShowWorldPath(
+                fullPath,
+                userWorldPosInMap: userWorldPos,
+                userNodeWorldPos: userNodeWorldPos);
         }
+
 
         float meters = totalWeight / mapUnitsPerMeter;
         float seconds = meters / walkSpeedMetersPerSecond;
@@ -110,16 +125,32 @@ public class NavigationPopup : MonoBehaviour
         List<NavNode> fullPath = navGraph.FindPath(startNode, pendingDestination);
 
         // Visualize in world
+        // Visualize in world
         if (userVisualizer != null)
         {
             userVisualizer.worldScaleMultiplier = 1f / mapUnitsPerMeter;
-            // Fix: pass map-space forward direction from userNode
-            Vector3 userMapForward = userTracker.transform.forward;
-            Vector3 userWorldForward = userTracker.transform.parent.TransformDirection(userMapForward); // ⬅️ convert to world space
 
-            userVisualizer.ShowWorldPath(fullPath, userWorldPos, userWorldForward);
+            // Get raw world forward
+            Vector3 userWorldForward = userTracker.userTransform.forward;
 
+            // Cancel out map rotation to get userNode.forward in map space
+            Quaternion worldToMap = Quaternion.Inverse(mapRootTransform.rotation);
+            Vector3 userForwardInMapSpace = worldToMap * userWorldForward.normalized;
+
+            // Then: align this with world forward
+            userVisualizer.LockRotation(userForwardInMapSpace, userWorldForward);
+
+            // 🛠️ FIXED: define this here
+            Vector3 userNodeWorldPos = userTracker.transform.position;
+
+            userVisualizer.ShowWorldPath(
+                fullPath,
+                userWorldPosInMap: userWorldPos,
+                userNodeWorldPos: userNodeWorldPos);
         }
+
+
+
 
         // ✅ Close map
         MapController mapController = FindAnyObjectByType<MapController>(FindObjectsInactive.Include);
