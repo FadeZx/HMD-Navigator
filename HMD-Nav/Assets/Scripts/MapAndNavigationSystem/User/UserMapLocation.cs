@@ -9,6 +9,7 @@ public class UserMapLocation : MonoBehaviour
     private Vector3 initialXRRigWorldPos;
     private Vector3 initialUserNodeLocalPos;
     private Quaternion initialMapRotation;
+    private Vector3 forwardInMap;
 
     void Start()
     {
@@ -23,6 +24,12 @@ public class UserMapLocation : MonoBehaviour
         initialUserNodeLocalPos = transform.localPosition;
         initialMapRotation = mapRootTransform.rotation * Quaternion.Inverse(transform.rotation);
 
+    }
+
+
+    public Vector3 GetUserNodeForwardInMapSpace()
+    {
+        return forwardInMap;
     }
 
     void Update()
@@ -43,7 +50,7 @@ public class UserMapLocation : MonoBehaviour
         if (worldForward.sqrMagnitude > 0.001f)
         {
             Quaternion currentWorldToMap = Quaternion.Inverse(mapRootTransform.rotation);
-            Vector3 forwardInMap = currentWorldToMap * worldForward.normalized;
+            forwardInMap = currentWorldToMap * worldForward.normalized;
             transform.localRotation = Quaternion.LookRotation(forwardInMap);
         }
     }

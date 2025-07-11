@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class NavigationPopup : MonoBehaviour
 {
@@ -13,31 +14,35 @@ public class NavigationPopup : MonoBehaviour
     private NavNode pendingDestination;
     public NavNode initDest;
 
-    [Header("Path Calculation ")]
+    [Header("Path Calculation")]
     private float walkSpeedMetersPerSecond;  // You can tune this in Inspector
     private float mapUnitsPerMeter;
 
-
-    // public GameObject overlayArrow;  ❌ remove this
-    public UserNavigationVisualizer userVisualizer; // ✅ Add this instead
-
-    private void Start()
-    {
-       
-
-
-    }
+    public UserNavigationVisualizer userVisualizer; // ✅ Path visualizer in world space
 
     private IEnumerator InitNavigationAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
         SetDestination(initDest);
-        ConfirmNavigation(); // Optional follow-up action
+        ConfirmNavigation();
     }
 
-    /// <summary>
-    /// Sets the destination and immediately shows the path from user to destination
-    /// </summary>
+    // ✅ Use XR rig forward in world space (not userNode forward)
+    private float GetAngleOffsetBetweenXRRigAndMapPath(List<NavNode> path)
+    {
+        if (path == null || path.Count < 2) return 0f;
+
+        Vector3 xrRigForward = userTracker.userTransform.forward;
+        Vector3 pathDir = (path[1].transform.position - path[0].transform.position).normalized;
+
+        xrRigForward.y = 0f;
+        pathDir.y = 0f;
+
+        return Vector3.SignedAngle(xrRigForward, pathDir, Vector3.up);
+    }
+
+
+
     public void SetDestination(NavNode destination)
     {
         mapUnitsPerMeter = NavConfig.Instance.mapUnitsPerMeter;
@@ -54,40 +59,36 @@ public class NavigationPopup : MonoBehaviour
         }
 
         List<NavNode> fullPath = navGraph.FindPath(nearestNode, destination);
-
         float graphPathWeight = navGraph.GetPathWeight(fullPath);
         float userToGraphDist = Vector3.Distance(userWorldPos, nearestNode.transform.position);
         float scaledUserDist = userToGraphDist * mapUnitsPerMeter;
-
         float totalWeight = graphPathWeight + scaledUserDist;
 
-        // Visualize on map
+        // Map path
         visualizer.ShowPathWithUserStart(fullPath, userWorldPos);
 
-        // Visualize in world
+        // World path
         if (userVisualizer != null)
         {
             userVisualizer.worldScaleMultiplier = 1f / mapUnitsPerMeter;
 
-            // Get raw world forward
-            Vector3 userWorldForward = userTracker.userTransform.forward;
+            float signedAngle = GetAngleOffsetBetweenXRRigAndMapPath(fullPath);
 
-            // Cancel out map rotation to get userNode.forward in map space
-            Quaternion worldToMap = Quaternion.Inverse(mapRootTransform.rotation);
-            Vector3 userForwardInMapSpace = worldToMap * userWorldForward.normalized;
+            Quaternion rotationOffset = Quaternion.AngleAxis(signedAngle, Vector3.up);
+            userVisualizer.LockRotation(rotationOffset);
 
-            // Then: align this with world forward
-            userVisualizer.LockRotation(userForwardInMapSpace, userWorldForward);
+            Debug.Log($"📐 [Angle] Applied signed angle offset from XR Rig to path: {signedAngle:F1}°");
 
-            // 🛠️ FIXED: define this here
             Vector3 userNodeWorldPos = userTracker.transform.position;
 
             userVisualizer.ShowWorldPath(
-                fullPath,
-                userWorldPosInMap: userWorldPos,
-                userNodeWorldPos: userNodeWorldPos);
-        }
+     fullPath,
+     xrRigWorldPosition: userTracker.userTransform.position
+ );
 
+
+            Debug.Log($"🧭 [DEBUG] Angle between XR Rig forward and path: {GetAngleOffsetBetweenXRRigAndMapPath(fullPath):F1}°");
+        }
 
         float meters = totalWeight / mapUnitsPerMeter;
         float seconds = meters / walkSpeedMetersPerSecond;
@@ -97,12 +98,6 @@ public class NavigationPopup : MonoBehaviour
         Debug.Log($"[NavigationPopup] Distance: {meters:F1} meters, Time: {min}m {sec}s");
     }
 
-
-
-
-    /// <summary>
-    /// Called after path is shown — to do more things (e.g., enable AR arrow, UI messages, etc.)
-    /// </summary>
     public void ConfirmNavigation()
     {
         if (pendingDestination == null)
@@ -124,35 +119,27 @@ public class NavigationPopup : MonoBehaviour
 
         List<NavNode> fullPath = navGraph.FindPath(startNode, pendingDestination);
 
-        // Visualize in world
-        // Visualize in world
         if (userVisualizer != null)
         {
             userVisualizer.worldScaleMultiplier = 1f / mapUnitsPerMeter;
 
-            // Get raw world forward
-            Vector3 userWorldForward = userTracker.userTransform.forward;
+            float signedAngle = GetAngleOffsetBetweenXRRigAndMapPath(fullPath);
+            Quaternion rotationOffset = Quaternion.AngleAxis(signedAngle, Vector3.up);
+            userVisualizer.LockRotation(rotationOffset);
 
-            // Cancel out map rotation to get userNode.forward in map space
-            Quaternion worldToMap = Quaternion.Inverse(mapRootTransform.rotation);
-            Vector3 userForwardInMapSpace = worldToMap * userWorldForward.normalized;
+            Debug.Log($"📐 [Angle] Applied signed angle offset from XR Rig to path: {signedAngle:F1}°");
 
-            // Then: align this with world forward
-            userVisualizer.LockRotation(userForwardInMapSpace, userWorldForward);
-
-            // 🛠️ FIXED: define this here
             Vector3 userNodeWorldPos = userTracker.transform.position;
 
             userVisualizer.ShowWorldPath(
-                fullPath,
-                userWorldPosInMap: userWorldPos,
-                userNodeWorldPos: userNodeWorldPos);
+      fullPath,
+      xrRigWorldPosition: userTracker.userTransform.position
+  );
+
+
+            Debug.Log($"🧭 [DEBUG] Angle between XR Rig forward and path: {GetAngleOffsetBetweenXRRigAndMapPath(fullPath):F1}°");
         }
 
-
-
-
-        // ✅ Close map
         MapController mapController = FindAnyObjectByType<MapController>(FindObjectsInactive.Include);
         if (mapController != null)
             mapController.ToggleMap();
@@ -160,13 +147,10 @@ public class NavigationPopup : MonoBehaviour
 
 
 
-
     public void Cancel()
     {
-        visualizer.ClearPath();       // ✅ Clears the map path
-        userVisualizer?.ClearPath();  // ✅ Also clear the real-world path if it exists
+        visualizer.ClearPath();
+        userVisualizer?.ClearPath();
         pendingDestination = null;
     }
-
-
 }

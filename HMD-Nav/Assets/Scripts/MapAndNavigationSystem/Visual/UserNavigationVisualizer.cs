@@ -24,59 +24,61 @@ public class UserNavigationVisualizer : MonoBehaviour
         lineRenderer.useWorldSpace = true;
         lineRenderer.enabled = false;
     }
-    public void LockRotation(Vector3 mapForward, Vector3 xrForward)
+    public void LockRotation(Quaternion mapToWorldRotation)
     {
-        mapForward.y = 0f;
-        xrForward.y = 0f;
-
-        if (mapForward.sqrMagnitude < 0.001f || xrForward.sqrMagnitude < 0.001f)
-        {
-            Debug.LogWarning("Invalid vectors passed to LockRotation.");
-            return;
-        }
-
-        lockedMapToWorldRotation = Quaternion.FromToRotation(mapForward.normalized, xrForward.normalized);
+        lockedMapToWorldRotation = mapToWorldRotation;
         hasLockedRotation = true;
     }
 
+    public Transform mapTransform; // Assign this in inspector or externally
 
-    public void ShowWorldPath(List<NavNode> path, Vector3 userWorldPosInMap, Vector3 userNodeWorldPos)
-
+    public void ShowWorldPath(List<NavNode> path, Vector3 xrRigWorldPosition)
     {
-        if (!hasLockedRotation)
-        {
-            Debug.LogWarning("Cannot show path: rotation not locked.");
-            return;
-        }
-
-        if (path == null || path.Count < 2)
+        if (path == null || path.Count < 2 || mapTransform == null)
         {
             ClearPath();
             return;
         }
 
-        Vector3 mapOrigin = path[0].transform.position;
-        Vector3 baseWorldPos = userNodeWorldPos - new Vector3(0f, verticalOffset, 0f);
+        Vector3 baseWorldPos = xrRigWorldPosition;
+        baseWorldPos.y -= verticalOffset;
         float floorY = baseWorldPos.y;
-
         worldPoints.Clear();
 
-        for (int i = 0; i < path.Count; i++)
+        Vector3 firstLocalPos = mapTransform.InverseTransformPoint(path[0].transform.position);
+        Vector3 secondLocalPos = mapTransform.InverseTransformPoint(path[1].transform.position);
+        Vector3 localPathDir = (secondLocalPos - firstLocalPos).normalized;
+
+        Vector3 rigForwardFlat = new Vector3(userOrigin.forward.x, 0f, userOrigin.forward.z).normalized;
+        Vector3 baseForward = new Vector3(localPathDir.x, 0f, localPathDir.z).normalized;
+
+        float signedAngle = Vector3.SignedAngle(baseForward, rigForwardFlat, Vector3.up);
+        Quaternion rotationToRig = Quaternion.AngleAxis(signedAngle, Vector3.up);
+
+        Quaternion finalRotation = hasLockedRotation
+            ? rotationToRig * lockedMapToWorldRotation
+            : rotationToRig;
+
+        foreach (var node in path)
         {
-            Vector3 offsetInMap = path[i].transform.position - mapOrigin;
-            Vector3 rotatedOffset = lockedMapToWorldRotation * offsetInMap;
-            Vector3 worldOffset = rotatedOffset * worldScaleMultiplier;
+            Vector3 nodeLocal = mapTransform.InverseTransformPoint(node.transform.position);
+            Vector3 offset = nodeLocal - firstLocalPos;
 
-            Vector3 finalWorldPos = baseWorldPos + worldOffset;
-            finalWorldPos.y = floorY;
+            Vector3 rotatedOffset = finalRotation * offset;
 
-            worldPoints.Add(finalWorldPos);
+            Vector3 worldPos = baseWorldPos + rotatedOffset * worldScaleMultiplier;
+            worldPos.y = floorY;
+
+            worldPoints.Add(worldPos);
         }
 
         lineRenderer.positionCount = worldPoints.Count;
         lineRenderer.SetPositions(worldPoints.ToArray());
         lineRenderer.enabled = true;
+
+        Debug.Log($"✅ World path shown with locked rotation + XR alignment: {signedAngle:F1}°");
     }
+
 
 
 
