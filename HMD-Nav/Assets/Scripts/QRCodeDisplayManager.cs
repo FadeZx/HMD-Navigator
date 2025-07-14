@@ -135,7 +135,7 @@ public class QrCodeDisplayManager : MonoBehaviour
 
             if (!accumulator.IsStable(posVarThreshold, angleVarThreshold))
             {
-                // Optionally, show a preview marker here if you want!
+                // Optionally, show a preview marker here
                 continue;
             }
 

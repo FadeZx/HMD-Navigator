@@ -25,7 +25,7 @@ public class MarkerController : MonoBehaviour
         transform.localScale = scale;
         if (_textMesh)
         {
-            //_textMesh.text = text;
+            _textMesh.text = text;
             _qrText = text; // Remember which marker we're showing
         }
 
@@ -52,13 +52,26 @@ public class MarkerController : MonoBehaviour
         if (markerInfo != null)
         {
             float distance = markerInfo.GetDistanceTo(_camera.transform);
-            Vector3 localPos = markerInfo.GetLocalPosition(_camera.transform);
-            // Compose real-time label text (change to whatever format you want!)
-            _textMesh.text = $"Dist: {distance:F2}m\nLocal: {localPos.ToString("F2")}";
+
+            // Direction (marker-to-camera, in marker local space)
+            Vector3 dirWorld = (_camera.transform.position - markerInfo.position).normalized;
+            Vector3 dirLocal = Quaternion.Inverse(markerInfo.rotation) * dirWorld; // Local direction in marker space
+
+            // For rotation/orientation, you can also show relative euler angles if you want:
+            Quaternion localRot = Quaternion.Inverse(markerInfo.rotation) * _camera.transform.rotation;
+            Vector3 localEuler = localRot.eulerAngles;
+
+            // Display everything as text
+            _textMesh.text =
+                $"{_qrText}\n" +
+                $"Dist: {distance:F2}m\n" +
+                $"Dir: {dirLocal.ToString("F2")}\n" +
+                $"Euler: {localEuler.ToString("F0")}";
+
         }
         else
         {
-            _textMesh.text = "Marker not tracked";
+            _textMesh.text = $"{_qrText}\n(Not tracked)";
         }
 
         //if (_textMesh)
@@ -71,4 +84,6 @@ public class MarkerController : MonoBehaviour
         //    gameObject.SetActive(false);
         //}
     }
+
+
 }
