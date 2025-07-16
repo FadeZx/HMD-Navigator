@@ -25,7 +25,6 @@ public class MarkerController : MonoBehaviour
         transform.localScale = scale;
         if (_textMesh)
         {
-            _textMesh.text = text;
             _qrText = text; // Remember which marker we're showing
         }
 
@@ -52,21 +51,15 @@ public class MarkerController : MonoBehaviour
         if (markerInfo != null)
         {
             float distance = markerInfo.GetDistanceTo(_camera.transform);
+            float markerToCameraAngle = markerInfo.GetAngleToTarget(_camera.transform);
+            float cameraViewToMarkerAngle = markerInfo.GetViewAngleFromTarget(_camera.transform);
 
-            // Direction (marker-to-camera, in marker local space)
-            Vector3 dirWorld = (_camera.transform.position - markerInfo.position).normalized;
-            Vector3 dirLocal = Quaternion.Inverse(markerInfo.rotation) * dirWorld; // Local direction in marker space
-
-            // For rotation/orientation, you can also show relative euler angles if you want:
-            Quaternion localRot = Quaternion.Inverse(markerInfo.rotation) * _camera.transform.rotation;
-            Vector3 localEuler = localRot.eulerAngles;
-
-            // Display everything as text
             _textMesh.text =
                 $"{_qrText}\n" +
                 $"Dist: {distance:F2}m\n" +
-                $"Dir: {dirLocal.ToString("F2")}\n" +
-                $"Euler: {localEuler.ToString("F0")}";
+                $"Angle (marker->you): {markerToCameraAngle:F1}\n" +
+                $"Angle (your view->marker): {cameraViewToMarkerAngle:F1}°";
+
 
         }
         else

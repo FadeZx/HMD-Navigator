@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
+using Unity.Android.Gradle;
+using UnityEngine;
 
 public class QRCodeTracker : MonoBehaviour
 {
@@ -20,6 +21,27 @@ public class QRCodeTracker : MonoBehaviour
 
         public Quaternion GetLocalRotation(Transform target) =>
             Quaternion.Inverse(rotation) * target.rotation;
+
+        //Angle between marker's forward and the direction to the user
+        //0° = target is directly in front; 180° = directly behind.
+        public float GetAngleToTarget(Transform target)
+        {
+            Vector3 toTarget = (target.position - position).normalized;
+            Vector3 markerForward = rotation * Vector3.forward;
+            return Vector3.Angle(markerForward, toTarget);
+        }
+
+        //Angle between the users's view direction and the marker
+        //0° = looking straight at marker; 180° = looking away.
+
+        public float GetViewAngleFromTarget(Transform target)
+        {
+            Vector3 toMarker = (position - target.position).normalized;
+            Vector3 targetForward = target.forward;
+            return Vector3.Angle(targetForward, toMarker);
+        }
+
+
 
     }
 
