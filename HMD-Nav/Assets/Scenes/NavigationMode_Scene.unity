@@ -860,7 +860,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xrRigTransform: {fileID: 1703213335}
   mapRootTransform: {fileID: 540999068}
-  worldToMapScale: 0.0012
 --- !u!1 &277463717
 GameObject:
   m_ObjectHideFlags: 0
@@ -2894,9 +2893,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1517185431}
-  - component: {fileID: 1517185430}
-  - component: {fileID: 1517185429}
   - component: {fileID: 1517185432}
+  - component: {fileID: 1517185433}
+  - component: {fileID: 1517185429}
+  - component: {fileID: 1517185430}
   m_Layer: 0
   m_Name: NavigationController
   m_TagString: Untagged
@@ -2919,7 +2919,6 @@ MonoBehaviour:
   lineRenderer: {fileID: 1517185430}
   userOrigin: {fileID: 1703213335}
   verticalOffset: 0.5
-  worldScaleMultiplier: 2
   manualRotationOffset: 0
   mapTransform: {fileID: 1576900450}
 --- !u!120 &1517185430
@@ -3056,8 +3055,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2616d86e053f0204da02d601aadaf162, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapUnitsPerMeter: 0.0012
+  mapUnitsPerMeter: 0.5
   walkSpeed: 1.2
+  reachThreshold: 1
+--- !u!114 &1517185433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1517185428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfa5bd0f5ced0e040a72f7490c6e3045, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  userTracker: {fileID: 119046192}
+  userVisualizer: {fileID: 1517185429}
+  visualizer: {fileID: 1576900452}
 --- !u!1 &1576900444
 GameObject:
   m_ObjectHideFlags: 0
@@ -3384,8 +3399,10 @@ MonoBehaviour:
   userTracker: {fileID: 119046192}
   visualizer: {fileID: 1576900452}
   mapRootTransform: {fileID: 540999068}
+  nodeRoot: {fileID: 459904298}
   initDest: {fileID: 0}
   userVisualizer: {fileID: 1517185429}
+  navigationUpdater: {fileID: 1517185433}
 --- !u!1 &1622390212
 GameObject:
   m_ObjectHideFlags: 0
@@ -4137,12 +4154,24 @@ PrefabInstance:
       value: 0.18071331
       objectReference: {fileID: 0}
     - target: {fileID: 2144589704704204221, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: reachRadiusDebug
+      value: 0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 2144589704704204221, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: connections.Array.data[0].weight
+      value: 0.055471137
+      objectReference: {fileID: 0}
+    - target: {fileID: 2144589704704204221, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[1].weight
-      value: 0.058196753
+      value: 0.05819675
+      objectReference: {fileID: 0}
+    - target: {fileID: 2144589704704204221, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: manualConnections.Array.data[0].weight
+      value: 0.055471137
       objectReference: {fileID: 0}
     - target: {fileID: 2144589704704204221, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: manualConnections.Array.data[1].weight
-      value: 0.058196753
+      value: 0.05819675
       objectReference: {fileID: 0}
     - target: {fileID: 2630262785487030012, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[0].weight
@@ -4161,24 +4190,44 @@ PrefabInstance:
       value: 0.055654354
       objectReference: {fileID: 0}
     - target: {fileID: 3320602251509809654, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: reachRadiusDebug
+      value: 0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 3320602251509809654, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[0].weight
-      value: 0.11146018
+      value: 0.111460194
+      objectReference: {fileID: 0}
+    - target: {fileID: 3320602251509809654, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: connections.Array.data[1].weight
+      value: 0.055471137
       objectReference: {fileID: 0}
     - target: {fileID: 3320602251509809654, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: manualConnections.Array.data[0].weight
-      value: 0.11146018
+      value: 0.111460194
+      objectReference: {fileID: 0}
+    - target: {fileID: 3320602251509809654, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: manualConnections.Array.data[1].weight
+      value: 0.055471137
       objectReference: {fileID: 0}
     - target: {fileID: 3881147783458679370, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: m_Name
       value: RoutesNode
       objectReference: {fileID: 0}
     - target: {fileID: 3990256122716476058, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: reachRadiusDebug
+      value: 0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 3990256122716476058, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[0].weight
       value: 0.07031043
       objectReference: {fileID: 0}
     - target: {fileID: 3990256122716476058, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: manualConnections.Array.data[0].weight
       value: 0.07031043
+      objectReference: {fileID: 0}
+    - target: {fileID: 4240523871958135206, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: reachRadiusDebug
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 4240523871958135206, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.size
@@ -4194,7 +4243,7 @@ PrefabInstance:
       objectReference: {fileID: 2078608214}
     - target: {fileID: 4240523871958135206, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[1].weight
-      value: 0.0227119
+      value: 0.022711888
       objectReference: {fileID: 0}
     - target: {fileID: 4240523871958135206, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: manualConnections.Array.data[1].target
@@ -4202,7 +4251,7 @@ PrefabInstance:
       objectReference: {fileID: 2078608214}
     - target: {fileID: 4240523871958135206, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: manualConnections.Array.data[1].weight
-      value: 0.0227119
+      value: 0.022711888
       objectReference: {fileID: 0}
     - target: {fileID: 4595324925644962239, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[0].weight
@@ -4229,12 +4278,24 @@ PrefabInstance:
       value: 0.110952474
       objectReference: {fileID: 0}
     - target: {fileID: 5098750256793910934, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: reachRadiusDebug
+      value: 0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 5098750256793910934, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[0].weight
-      value: 0.02855328
+      value: 0.028553262
+      objectReference: {fileID: 0}
+    - target: {fileID: 5098750256793910934, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: connections.Array.data[1].weight
+      value: 0.111460194
       objectReference: {fileID: 0}
     - target: {fileID: 5098750256793910934, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: manualConnections.Array.data[0].weight
-      value: 0.02855328
+      value: 0.028553262
+      objectReference: {fileID: 0}
+    - target: {fileID: 5098750256793910934, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: manualConnections.Array.data[1].weight
+      value: 0.111460194
       objectReference: {fileID: 0}
     - target: {fileID: 5604437574732147399, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[0].weight
@@ -4251,6 +4312,26 @@ PrefabInstance:
     - target: {fileID: 5604437574732147399, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: manualConnections.Array.data[1].weight
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5647558090622138446, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: reachRadiusDebug
+      value: 0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 5647558090622138446, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: connections.Array.data[0].weight
+      value: 0.061597884
+      objectReference: {fileID: 0}
+    - target: {fileID: 5647558090622138446, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: connections.Array.data[1].weight
+      value: 0.028553262
+      objectReference: {fileID: 0}
+    - target: {fileID: 5647558090622138446, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: manualConnections.Array.data[0].weight
+      value: 0.061597884
+      objectReference: {fileID: 0}
+    - target: {fileID: 5647558090622138446, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: manualConnections.Array.data[1].weight
+      value: 0.028553262
       objectReference: {fileID: 0}
     - target: {fileID: 6864026345858628223, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[0].weight
@@ -4313,6 +4394,10 @@ PrefabInstance:
       value: 0.06517737
       objectReference: {fileID: 0}
     - target: {fileID: 7853898023586211447, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: reachRadiusDebug
+      value: 0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 7853898023586211447, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -4322,19 +4407,23 @@ PrefabInstance:
       objectReference: {fileID: 431822440997814615}
     - target: {fileID: 7853898023586211447, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[0].weight
-      value: 0.058196753
+      value: 0.05819675
       objectReference: {fileID: 0}
     - target: {fileID: 7853898023586211447, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: manualConnections.Array.data[0].weight
-      value: 0.058196753
+      value: 0.05819675
+      objectReference: {fileID: 0}
+    - target: {fileID: 8006134533071941474, guid: 69109beab26304d44b5562871af91c6b, type: 3}
+      propertyPath: reachRadiusDebug
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 8006134533071941474, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: connections.Array.data[1].weight
-      value: 0.061597873
+      value: 0.061597884
       objectReference: {fileID: 0}
     - target: {fileID: 8006134533071941474, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: manualConnections.Array.data[1].weight
-      value: 0.061597873
+      value: 0.061597884
       objectReference: {fileID: 0}
     - target: {fileID: 9039358516553501567, guid: 69109beab26304d44b5562871af91c6b, type: 3}
       propertyPath: m_Pivot.x
@@ -4876,7 +4965,7 @@ PrefabInstance:
       objectReference: {fileID: 431822440997814614}
     - target: {fileID: 8395443079522632885, guid: c82575d729ad72b47a1969fe075773f0, type: 3}
       propertyPath: connections.Array.data[0].weight
-      value: 0.0227119
+      value: 0.022711888
       objectReference: {fileID: 0}
     - target: {fileID: 8395443079522632885, guid: c82575d729ad72b47a1969fe075773f0, type: 3}
       propertyPath: manualConnections.Array.data[0].target
@@ -4884,7 +4973,7 @@ PrefabInstance:
       objectReference: {fileID: 431822440997814614}
     - target: {fileID: 8395443079522632885, guid: c82575d729ad72b47a1969fe075773f0, type: 3}
       propertyPath: manualConnections.Array.data[0].weight
-      value: 0.0227119
+      value: 0.022711888
       objectReference: {fileID: 0}
     - target: {fileID: 8544612441564241681, guid: c82575d729ad72b47a1969fe075773f0, type: 3}
       propertyPath: m_AnchorMax.y

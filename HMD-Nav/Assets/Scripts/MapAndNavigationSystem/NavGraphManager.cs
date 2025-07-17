@@ -44,6 +44,8 @@ public class NavGraphManager : MonoBehaviour
         return closest;
     }
 
+
+
     public float GetPathWeight(List<NavNode> path)
     {
         float total = 0f;
@@ -59,6 +61,26 @@ public class NavGraphManager : MonoBehaviour
         }
         return total;
     }
+
+    public float GetPathDistanceFromWorldStart(Vector3 userWorldPos, List<NavNode> path)
+    {
+        if (path == null || path.Count == 0)
+            return 0f;
+
+        float distance = 0f;
+
+        // Distance from user to first node
+        distance += Vector3.Distance(userWorldPos, path[0].transform.position);
+
+        // Add edge distances in world units
+        for (int i = 0; i < path.Count - 1; i++)
+        {
+            distance += Vector3.Distance(path[i].transform.position, path[i + 1].transform.position);
+        }
+
+        return distance; // in Unity units
+    }
+
 
     //  Dijkstra's Algorithm
     public List<NavNode> FindPath(NavNode start, NavNode goal)

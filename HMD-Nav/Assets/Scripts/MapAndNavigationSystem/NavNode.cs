@@ -167,6 +167,7 @@ public class NavNode : MonoBehaviour
         }
     }
 
+
     private void OnDrawGizmos()
     {
         Gizmos.color = nodeType == NodeType.Attraction ? Color.cyan : Color.yellow;

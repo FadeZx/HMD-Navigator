@@ -4,7 +4,7 @@ public class UserMapLocation : MonoBehaviour
 {
     public Transform xrRigTransform;     // XR Rig or CenterEyeAnchor
     public Transform mapRootTransform;   // The rotating map (userNode's parent)
-    public float worldToMapScale = 0.5f; // 1 world meter = 0.5 map units
+    private float worldToMapScale; // 1 world meter = 0.5 map units
 
     private Vector3 initialXRRigWorldPos;
     private Vector3 initialUserNodeLocalPos;
@@ -23,7 +23,7 @@ public class UserMapLocation : MonoBehaviour
         initialXRRigWorldPos = xrRigTransform.position;
         initialUserNodeLocalPos = transform.localPosition;
         initialMapRotation = mapRootTransform.rotation * Quaternion.Inverse(transform.rotation);
-
+        worldToMapScale = NavConfig.Instance.mapUnitsPerMeter;
     }
 
 
@@ -41,7 +41,7 @@ public class UserMapLocation : MonoBehaviour
         Quaternion worldToMapRotation = Quaternion.Inverse(initialMapRotation);
         Vector3 deltaInMapSpace = worldToMapRotation * worldDelta;
 
-        transform.localPosition = initialUserNodeLocalPos + deltaInMapSpace * worldToMapScale;
+        transform.localPosition = initialUserNodeLocalPos + deltaInMapSpace * 0.5f;
 
         // Rotation logic — ?use current map rotation
         Vector3 worldForward = xrRigTransform.forward;

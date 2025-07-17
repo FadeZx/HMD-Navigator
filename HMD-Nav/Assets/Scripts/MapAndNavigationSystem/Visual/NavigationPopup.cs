@@ -10,6 +10,7 @@ public class NavigationPopup : MonoBehaviour
     public UserLocationTracker userTracker;
     public PathVisualizer visualizer;
     public Transform mapRootTransform; // The rotating map (userNode's parent)
+    public Transform nodeRoot; // ✅ Assign this in the inspector (e.g., a GameObject called "NodeRoot" under map)
 
     private NavNode pendingDestination;
     public NavNode initDest;
@@ -19,6 +20,10 @@ public class NavigationPopup : MonoBehaviour
     private float mapUnitsPerMeter;
 
     public UserNavigationVisualizer userVisualizer; // ✅ Path visualizer in world space
+    public NavigationUpdater navigationUpdater;
+
+    private List<NavNode> currentWorldPath = new List<NavNode>();
+
 
     private IEnumerator InitNavigationAfterDelay(float delay)
     {
@@ -45,57 +50,60 @@ public class NavigationPopup : MonoBehaviour
 
     public void SetDestination(NavNode destination)
     {
+        // ✅ FIX: Ensure these are assigned
         mapUnitsPerMeter = NavConfig.Instance.mapUnitsPerMeter;
         walkSpeedMetersPerSecond = NavConfig.Instance.walkSpeed;
-        pendingDestination = destination;
 
         Vector3 userWorldPos = userTracker.transform.position;
-        NavNode nearestNode = navGraph.FindNearestNode(userWorldPos);
+        NavNode startNode = navGraph.FindNearestNode(userWorldPos);
 
-        if (nearestNode == null || destination == null)
+        if (startNode == null || destination == null)
         {
             Debug.LogError("[NavigationPopup] Missing destination or nearest node.");
             return;
         }
 
-        List<NavNode> fullPath = navGraph.FindPath(nearestNode, destination);
-        float graphPathWeight = navGraph.GetPathWeight(fullPath);
-        float userToGraphDist = Vector3.Distance(userWorldPos, nearestNode.transform.position);
-        float scaledUserDist = userToGraphDist * mapUnitsPerMeter;
-        float totalWeight = graphPathWeight + scaledUserDist;
+        List<NavNode> fullPath = navGraph.FindPath(startNode, destination);
+        // ✅ Create a virtual NavNode for the user position
+        GameObject virtualStartGO = new GameObject("UserVirtualNode");
+        virtualStartGO.transform.position = userWorldPos;
+        virtualStartGO.transform.SetParent(nodeRoot != null ? nodeRoot : mapRootTransform);
 
+
+        NavNode virtualStartNode = virtualStartGO.AddComponent<NavNode>();
+        virtualStartNode.nodeID = "-1"; // ✅ Fix: assign string, not int
+                                     
+        
+        // ✅ Insert the virtual node at the beginning
+        fullPath.Insert(0, virtualStartNode);
         // Map path
-        visualizer.ShowPathWithUserStart(fullPath, userWorldPos);
+        visualizer.ShowPathWithoutUser(fullPath);
 
+        // World path
         // World path
         if (userVisualizer != null)
         {
-            userVisualizer.worldScaleMultiplier = 1f / mapUnitsPerMeter;
-
             float signedAngle = GetAngleOffsetBetweenXRRigAndMapPath(fullPath);
-
             Quaternion rotationOffset = Quaternion.AngleAxis(signedAngle, Vector3.up);
             userVisualizer.LockRotation(rotationOffset);
 
             Debug.Log($"📐 [Angle] Applied signed angle offset from XR Rig to path: {signedAngle:F1}°");
 
-            Vector3 userNodeWorldPos = userTracker.transform.position;
+            // ✅ Compute the world offset from map space origin
+            Vector3 userNodeLocal = mapRootTransform.InverseTransformPoint(userTracker.userTransform.position);
+            Vector3 mapToWorldOffset = userTracker.userTransform.position - (userNodeLocal / mapUnitsPerMeter);
+
 
             userVisualizer.ShowWorldPath(
-     fullPath,
-     xrRigWorldPosition: userTracker.userTransform.position
- );
-
+                fullPath,
+                mapToWorldOffset: mapToWorldOffset,
+                navGraph: navGraph
+            );
 
             Debug.Log($"🧭 [DEBUG] Angle between XR Rig forward and path: {GetAngleOffsetBetweenXRRigAndMapPath(fullPath):F1}°");
         }
 
-        float meters = totalWeight / mapUnitsPerMeter;
-        float seconds = meters / walkSpeedMetersPerSecond;
-        int min = Mathf.FloorToInt(seconds / 60f);
-        int sec = Mathf.FloorToInt(seconds % 60f);
 
-        Debug.Log($"[NavigationPopup] Distance: {meters:F1} meters, Time: {min}m {sec}s");
     }
 
     public void ConfirmNavigation()
@@ -117,33 +125,22 @@ public class NavigationPopup : MonoBehaviour
             return;
         }
 
-        List<NavNode> fullPath = navGraph.FindPath(startNode, pendingDestination);
 
-        if (userVisualizer != null)
-        {
-            userVisualizer.worldScaleMultiplier = 1f / mapUnitsPerMeter;
-
-            float signedAngle = GetAngleOffsetBetweenXRRigAndMapPath(fullPath);
-            Quaternion rotationOffset = Quaternion.AngleAxis(signedAngle, Vector3.up);
-            userVisualizer.LockRotation(rotationOffset);
-
-            Debug.Log($"📐 [Angle] Applied signed angle offset from XR Rig to path: {signedAngle:F1}°");
-
-            Vector3 userNodeWorldPos = userTracker.transform.position;
-
-            userVisualizer.ShowWorldPath(
-      fullPath,
-      xrRigWorldPosition: userTracker.userTransform.position
-  );
-
-
-            Debug.Log($"🧭 [DEBUG] Angle between XR Rig forward and path: {GetAngleOffsetBetweenXRRigAndMapPath(fullPath):F1}°");
-        }
 
         MapController mapController = FindAnyObjectByType<MapController>(FindObjectsInactive.Include);
         if (mapController != null)
-            mapController.ToggleMap();
+            //mapController.ToggleMap();
+        currentWorldPath = navGraph.FindPath(startNode, pendingDestination);
+        navigationUpdater.BeginPathProgression(
+    currentWorldPath,
+    userVisualizer.GetWorldPathPoints()
+);
+
     }
+
+
+
+
 
 
 

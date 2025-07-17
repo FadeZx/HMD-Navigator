@@ -2,8 +2,8 @@
 
 public class UserLocationTracker : MonoBehaviour
 {
-    public Transform userTransform;          // XR rig (world)
-    public Transform mapRootTransform;       // The rotating map (userNode's parent)
+    public Transform userTransform;         
+    public Transform mapRootTransform;     
     public NavGraphManager navGraph;
 
     private NavNode currentClosest;
@@ -47,8 +47,9 @@ public class UserLocationTracker : MonoBehaviour
             transform.rotation = Quaternion.LookRotation(mapRootTransform.rotation * forwardInMap, Vector3.up);
 
         Debug.DrawRay(transform.position, transform.forward * 0.5f, Color.green); // world-space forward
-    }
 
+
+    }
 
     public NavNode GetCurrentNode()
     {

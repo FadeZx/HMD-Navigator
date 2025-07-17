@@ -139,7 +139,7 @@ public class AttractionController : MonoBehaviour
     {
         if (distanceText == null || timeText == null || destinationNode == null)
             return;
-  
+
         NavigationPopup navPopup = FindFirstObjectByType<NavigationPopup>();
         NavGraphManager navGraph = FindFirstObjectByType<NavGraphManager>();
         if (navPopup == null || navGraph == null)
@@ -157,7 +157,9 @@ public class AttractionController : MonoBehaviour
             return;
         }
 
+        Vector3 userPos = navPopup.userTracker.transform.position;
         var path = navGraph.FindPath(userNode, destinationNode);
+
         if (path == null || path.Count == 0)
         {
             distanceText.text = "—";
@@ -165,16 +167,24 @@ public class AttractionController : MonoBehaviour
             return;
         }
 
-        float totalWeight = navGraph.GetPathWeight(path);
-        float meters = totalWeight / NavConfig.Instance.mapUnitsPerMeter;
-        float timeSeconds = meters / NavConfig.Instance.walkSpeed;
+        // ✅ Get raw Unity distance (in map units)
+        float rawDistance = navGraph.GetPathDistanceFromWorldStart(userPos, path);
 
+        // ✅ Convert to meters
+        float mapUnitsPerMeter = NavConfig.Instance.mapUnitsPerMeter;
+        float meters = rawDistance / mapUnitsPerMeter;
+
+        // ✅ Calculate walk time
+        float walkSpeed = NavConfig.Instance.walkSpeed;
+        float timeSeconds = meters / walkSpeed;
         int mins = Mathf.FloorToInt(timeSeconds / 60);
 
-        //  Updated formatting
+        // ✅ Display
         distanceText.text = $"{Mathf.RoundToInt(meters)} m";
         timeText.text = $"{mins} min";
 
+        Debug.Log($"[UpdateWeightText] Distance: {rawDistance:F2} units → {meters:F2} meters");
     }
+
 
 }

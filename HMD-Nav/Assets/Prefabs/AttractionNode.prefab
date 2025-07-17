@@ -719,6 +719,7 @@ MonoBehaviour:
   nodeVisual: {fileID: 7178132819829717508}
   textLabel: {fileID: 2488557575300023049}
   pokeInteractionObject: {fileID: 4513837208560252453}
+  reachRadiusDebug: 0.02
 --- !u!223 &2864362248750625038
 Canvas:
   m_ObjectHideFlags: 0

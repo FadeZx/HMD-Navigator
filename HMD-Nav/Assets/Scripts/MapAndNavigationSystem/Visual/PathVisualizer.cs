@@ -51,31 +51,29 @@ public class PathVisualizer : MonoBehaviour
 
     private void Update()
     {
-        if (currentPath != null && currentPath.Count > 0)
-        {
-            UpdateLine();
-        }
+       
     }
 
-    private void UpdateLine()
+
+    public void ShowPathWithoutUser(List<NavNode> path)
     {
-        if (lineRenderer.positionCount != currentPath.Count + 1)
-            lineRenderer.positionCount = currentPath.Count + 1;
+        if (path == null || path.Count < 2)
+        {
+            ClearPath();
+            return;
+        }
+
+        currentPath = path;
 
         Transform mapTransform = transform;
+        lineRenderer.positionCount = path.Count;
 
-        // Keep index 0 = user's world position
-        Vector3 userStart = userTracker.transform.position + Vector3.up * 0.005f;
-        lineRenderer.SetPosition(0, mapTransform.InverseTransformPoint(userStart));
-
-        for (int i = 0; i < currentPath.Count; i++)
+        for (int i = 0; i < path.Count; i++)
         {
-            Vector3 worldPos = currentPath[i].transform.position + Vector3.up * 0.005f;
-            lineRenderer.SetPosition(i + 1, mapTransform.InverseTransformPoint(worldPos));
+            Vector3 worldPos = path[i].transform.position + Vector3.up * 0.005f;
+            lineRenderer.SetPosition(i, mapTransform.InverseTransformPoint(worldPos));
         }
     }
-
-
 
     public void ClearPath()
     {
