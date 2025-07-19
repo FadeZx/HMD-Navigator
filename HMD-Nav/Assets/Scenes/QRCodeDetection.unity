@@ -390,9 +390,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 689455288610441653, guid: ff9724bcc3aa4e447981e12423ab2729, type: 3}
+      propertyPath: sampleFactor
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1256419807013363371, guid: ff9724bcc3aa4e447981e12423ab2729, type: 3}
       propertyPath: m_Name
       value: QRCodeDetector
+      objectReference: {fileID: 0}
+    - target: {fileID: 9009418451422929452, guid: ff9724bcc3aa4e447981e12423ab2729, type: 3}
+      propertyPath: poolSize
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

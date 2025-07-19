@@ -67,15 +67,12 @@ public class MarkerController : MonoBehaviour
             _textMesh.text = $"{_qrText}\n(Not tracked)";
         }
 
-        //if (_textMesh)
-        //{
-        //    _textMesh.transform.rotation = Quaternion.LookRotation(_textMesh.transform.position - _camera.transform.position);
-        //}
 
-        //if (gameObject.activeSelf && Time.time - lastUpdateTime > 2f)
-        //{
-        //    gameObject.SetActive(false);
-        //}
+        if (gameObject.activeSelf && Time.time - lastUpdateTime > 5f)
+        {
+            gameObject.SetActive(false);
+        }
+
     }
 
 

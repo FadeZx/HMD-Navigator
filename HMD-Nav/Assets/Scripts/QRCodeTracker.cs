@@ -1,10 +1,28 @@
 using System.Collections.Generic;
-using Unity.Android.Gradle;
 using UnityEngine;
 
 public class QRCodeTracker : MonoBehaviour
 {
     public static QRCodeTracker Instance { get; private set; }
+    private Camera _camera;
+    private readonly Dictionary<string, MarkerInfo> _markers = new();
+
+
+    public struct CalibrationInfo
+    {
+        public string qrText;
+        public Vector3 toMarker;        // Vector from camera to marker
+        public Vector3 markerForward;   // Marker’s forward vector
+        public float distance;
+
+        public CalibrationInfo(string qrText, Vector3 toMarker, Vector3 markerForward, float distance)
+        {
+            this.qrText = qrText;
+            this.toMarker = toMarker;
+            this.markerForward = markerForward;
+            this.distance = distance;
+        }
+    }
 
     public class MarkerInfo
     {
@@ -45,8 +63,6 @@ public class QRCodeTracker : MonoBehaviour
 
     }
 
-    private readonly Dictionary<string, MarkerInfo> _markers = new();
-
     private void Awake()
     {
         if (Instance && Instance != this)
@@ -56,6 +72,7 @@ public class QRCodeTracker : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(this);
+        _camera = Camera.main;
     }
 
     public void RegisterOrUpdateMarker(string qrText, Vector3 position, Quaternion rotation)
@@ -110,7 +127,41 @@ public class QRCodeTracker : MonoBehaviour
         return closest;
     }
 
-    public MarkerInfo GetMarker(string qrText)
+    public bool TryGetCalibrationInfo(out CalibrationInfo info, float maxDistance = 10f, float fovAngle = 90f)
+    {
+        info = default;
+
+        if (_camera == null)
+        {
+            Debug.LogWarning("Calibration camera not assigned.");
+            return false;
+        }
+
+        var closestMarker = GetClosestMarkerInView(_camera.transform, maxDistance, fovAngle);
+        if (closestMarker == null) return false;
+
+        Vector3 toMarker = (closestMarker.position - _camera.transform.position).normalized;
+        Vector3 markerForward = closestMarker.rotation * Vector3.forward;
+        float distance = Vector3.Distance(_camera.transform.position, closestMarker.position);
+
+        info = new CalibrationInfo(
+            closestMarker.qrText,
+            toMarker,
+            markerForward,
+            distance
+        );
+
+        return true;
+    }
+
+//    if (QRCodeTracker.Instance.TryGetCalibrationInfo(out var info))
+//     {
+//        Debug.Log($"[Calibration] Marker: {info.qrText} | Dist: {info.distance:F2}m");
+//        Debug.DrawRay(Camera.main.transform.position, info.toMarker, Color.green);
+//        Debug.DrawRay(Camera.main.transform.position + info.toMarker* info.distance, info.markerForward, Color.red);
+//    }
+
+public MarkerInfo GetMarker(string qrText)
     {
         _markers.TryGetValue(qrText, out var info);
         return info;

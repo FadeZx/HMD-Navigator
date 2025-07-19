@@ -195,7 +195,7 @@ public class QrCodeDisplayManager : MonoBehaviour
 class PoseAccumulator
 {
 
-    const int MaxSamples = 20;    //recent detections to consider
+    const int MaxSamples = 10;    //recent detections to consider
     readonly Queue<Vector3> positions = new();
     readonly Queue<Quaternion> rotations = new();
 

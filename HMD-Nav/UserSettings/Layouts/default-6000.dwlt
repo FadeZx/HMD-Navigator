@@ -192,7 +192,7 @@ MonoBehaviour:
     x: 0
     y: 0
     width: 1140.8
-    height: 538.4
+    height: 492
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
@@ -216,7 +216,7 @@ MonoBehaviour:
     x: 0
     y: 0
     width: 302.4
-    height: 538.4
+    height: 492
   m_MinSize: {x: 201, y: 226}
   m_MaxSize: {x: 4001, y: 4026}
   m_ActualView: {fileID: 14}
@@ -242,7 +242,7 @@ MonoBehaviour:
     x: 302.4
     y: 0
     width: 838.4
-    height: 538.4
+    height: 492
   m_MinSize: {x: 202, y: 226}
   m_MaxSize: {x: 4002, y: 4026}
   m_ActualView: {fileID: 15}
@@ -268,9 +268,9 @@ MonoBehaviour:
   m_Position:
     serializedVersion: 2
     x: 0
-    y: 538.4
+    y: 492
     width: 1140.8
-    height: 274.39996
+    height: 320.8
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 17}
@@ -430,7 +430,7 @@ MonoBehaviour:
     x: 0
     y: 79.200005
     width: 301.4
-    height: 512.4
+    height: 466
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -445,23 +445,23 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 
-      m_LastClickedID: 0
-      m_ExpandedIDs: c0d9ffff8cdaffffb2e4ffff16fbffff
+      m_SelectedIDs: 72250100
+      m_LastClickedID: 75122
+      m_ExpandedIDs: 3485fffffe85ffffdc8fffffa6a6ffff70a7ffff4ab1ffffe8c7ffffb4c8ffffded2ffff16fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: 
-        m_OriginalName: 
+        m_Name: WebCamTextureManagerPrefab
+        m_OriginalName: WebCamTextureManagerPrefab
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
           y: 0
           width: 0
           height: 0
-        m_UserData: 0
+        m_UserData: 69244
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 11
+        m_OriginalEventType: 0
         m_IsRenamingFilename: 0
         m_TrimLeadingAndTrailingWhitespace: 0
         m_ClientGUIView: {fileID: 9}
@@ -496,7 +496,7 @@ MonoBehaviour:
     x: 302.4
     y: 79.200005
     width: 836.4
-    height: 512.4
+    height: 466
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -1244,9 +1244,9 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 617.60004
+    y: 571.2
     width: 1139.8
-    height: 248.39996
+    height: 294.8
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -1280,9 +1280,9 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 562.4
+    y: 617.60004
     width: 1139.8
-    height: 303.59998
+    height: 248.39996
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -1321,10 +1321,10 @@ MonoBehaviour:
   m_LockTracker:
     m_IsLocked: 1
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 101.99997}
-    m_SelectedIDs: eee10000
-    m_LastClickedID: 57838
-    m_ExpandedIDs: 00000000eadd0000ecdd0000eedd0000
+    scrollPos: {x: 0, y: 107.60004}
+    m_SelectedIDs: 8e0a0100
+    m_LastClickedID: 68238
+    m_ExpandedIDs: 00000000eadd0000ecdd0000eedd000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1379,8 +1379,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 
-    m_LastClickedInstanceID: 0
+    m_SelectedInstanceIDs: aa0e0100
+    m_LastClickedInstanceID: 69290
     m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: c6230000
     m_RenameOverlay:
@@ -1454,7 +1454,7 @@ MonoBehaviour:
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
   m_LastInspectedObjectInstanceID: -1
-  m_LastVerticalScrollValue: 0
+  m_LastVerticalScrollValue: 50.399963
   m_GlobalObjectId: 
   m_InspectorMode: 0
   m_LockTracker:
