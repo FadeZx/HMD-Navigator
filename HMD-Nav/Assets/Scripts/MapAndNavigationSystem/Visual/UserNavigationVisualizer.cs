@@ -15,6 +15,12 @@ public class UserNavigationVisualizer : MonoBehaviour
 
     private List<Vector3> worldPoints = new List<Vector3>();
 
+    [Header("Debug Offset (for testing)")]
+    public Vector3 debugPathOffset; // Use this to nudge the path in inspector
+
+    public enum DisplayMode { None, FullPath, EdgeOnly }
+    private DisplayMode currentDisplayMode = DisplayMode.None;
+
     private void Awake()
     {
         if (lineRenderer == null)
@@ -28,6 +34,28 @@ public class UserNavigationVisualizer : MonoBehaviour
         lockedMapToWorldRotation = mapToWorldRotation;
         hasLockedRotation = true;
     }
+
+
+    void Update()
+    {
+      
+        if (lineRenderer.enabled == false || currentDisplayMode != DisplayMode.FullPath) return;
+
+        // Update full path with debug offset
+        if (worldPoints.Count > 0)
+        {
+            List<Vector3> adjustedPoints = new List<Vector3>();
+            foreach (var p in worldPoints)
+            {
+                Vector3 adjusted = p + debugPathOffset;
+                adjustedPoints.Add(adjusted);
+            }
+            lineRenderer.positionCount = adjustedPoints.Count;
+            lineRenderer.SetPositions(adjustedPoints.ToArray());
+        }
+    }
+
+
 
     public Transform mapTransform; // Assign this in inspector or externally
 
@@ -65,7 +93,8 @@ public class UserNavigationVisualizer : MonoBehaviour
             Vector3 nodeLocal = mapTransform.InverseTransformPoint(path[i].transform.position);
             Vector3 offset = nodeLocal - firstMapLocal;
             Vector3 rotatedOffset = finalRotation * offset;
-            Vector3 worldPos = mapToWorldOffset + rotatedOffset / mapUnitsPerMeter;
+            Vector3 worldPos = mapToWorldOffset + rotatedOffset / mapUnitsPerMeter + debugPathOffset;
+
             worldPos.y = floorY;
             worldPoints.Add(worldPos);
         }
@@ -89,6 +118,8 @@ public class UserNavigationVisualizer : MonoBehaviour
 
         float expectedFromWeights = navGraph.GetPathWeight(path) / mapUnitsPerMeter;
         Debug.Log($"📏 [World Path] Total length: {totalWorldLength:F2}m | Expected from map weight: {expectedFromWeights:F2}m");
+
+        currentDisplayMode = DisplayMode.FullPath;
     }
 
 
@@ -101,15 +132,22 @@ public class UserNavigationVisualizer : MonoBehaviour
 
 
 
-    public void ShowSingleEdge(Vector3 userWorldPos, Vector3 nextNodeWorldPos)
+    public void ShowSingleEdge(Vector3 fromWorldPos, Vector3 toWorldPos)
     {
         if (lineRenderer == null) return;
 
+        Vector3 adjustedFrom = fromWorldPos; // Already offset before passed in
+        Vector3 adjustedTo = toWorldPos;
+
         lineRenderer.positionCount = 2;
-        lineRenderer.SetPosition(0, userWorldPos + Vector3.up * verticalOffset);
-        lineRenderer.SetPosition(1, nextNodeWorldPos + Vector3.up * verticalOffset);
+        lineRenderer.SetPosition(0, adjustedFrom);
+        lineRenderer.SetPosition(1, adjustedTo);
         lineRenderer.enabled = true;
+
+        currentDisplayMode = DisplayMode.EdgeOnly;
     }
+
+
 
 
 
@@ -117,5 +155,7 @@ public class UserNavigationVisualizer : MonoBehaviour
     {
         worldPoints.Clear();
         lineRenderer.positionCount = 0;
+        currentDisplayMode = DisplayMode.None;
     }
+
 }

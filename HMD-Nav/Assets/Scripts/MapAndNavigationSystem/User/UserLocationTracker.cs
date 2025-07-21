@@ -51,6 +51,38 @@ public class UserLocationTracker : MonoBehaviour
 
     }
 
+    public void MoveUserNodeRelativeToMarker(NavNode markerNode, float angleDegrees, float distance)
+    {
+        if (markerNode == null || markerNode.nodeType != NodeType.Marker)
+        {
+            Debug.LogWarning("[UserLocationTracker] Marker node is null or not a Marker.");
+            return;
+        }
+
+        // 1️⃣ Base direction = marker.forward (in world space)
+        Vector3 markerForward = markerNode.transform.forward;
+        markerForward.y = 0f; // keep it flat
+        markerForward.Normalize();
+
+        // 2️⃣ Rotate marker forward by given angle around Y axis
+        Quaternion rotationOffset = Quaternion.Euler(0f, angleDegrees, 0f);
+        Vector3 direction = rotationOffset * markerForward;
+
+        // 3️⃣ Calculate target position
+        Vector3 targetWorldPosition = markerNode.transform.position + direction * distance;
+
+        // 4️⃣ Move user node (this GameObject)
+        transform.position = targetWorldPosition;
+
+        // 5️⃣ Face same direction as direction vector
+        if (direction.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+
+        Debug.DrawLine(markerNode.transform.position, targetWorldPosition, Color.red, 2f);
+        Debug.Log($"[UserLocationTracker] Moved user node to {distance}m at {angleDegrees}° from marker {markerNode.nodeID}");
+    }
+
+
     public NavNode GetCurrentNode()
     {
         return currentClosest;

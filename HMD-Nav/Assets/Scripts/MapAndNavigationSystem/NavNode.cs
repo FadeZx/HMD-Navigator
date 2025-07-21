@@ -2,13 +2,13 @@
 using UnityEngine;
 using TMPro;
 
-
 public enum NodeType
 {
     RouteJunction,
     Attraction,
     Elevator,
-    Entrance
+    Entrance,
+    Marker // ✅ NEW type
 }
 
 [ExecuteAlways]
@@ -16,7 +16,6 @@ public class NavNode : MonoBehaviour
 {
     public string nodeID;
     public NodeType nodeType;
-    public bool hasCVMarker = false;
 
     public float gizmoRadius = 0.2f;
 
@@ -25,24 +24,16 @@ public class NavNode : MonoBehaviour
 
     [HideInInspector] public List<NavEdge> connections = new List<NavEdge>();
 
-
     [Header("Edit Mode Visual")]
     public bool isEditMode = false;
-    public  GameObject  nodeVisual;
-    public GameObject textLabel; // 👈 Add this
+    public GameObject nodeVisual;
+    public GameObject textLabel;
     public GameObject pokeInteractionObject;
 
     private NavNodeSpawner spawner;
 
-
-    private void Start()
-    {
-        EnsureBidirectionalConnections(); // auto-fix one-way links
-    }
-
     private void Awake()
     {
-        // Find the NavNodeSpawner in the scene
         spawner = FindFirstObjectByType<NavNodeSpawner>();
         if (spawner == null)
         {
@@ -53,20 +44,16 @@ public class NavNode : MonoBehaviour
         {
             nodeID = $"{nodeType}_{gameObject.name}";
         }
-        
 
         UpdateEditVisual();
     }
 
-    // Inside your NavNode script
-    public void SpawnWorldNode()
+    private void Start()
     {
-        if (spawner != null)
+        if (nodeType != NodeType.Marker)
         {
-            spawner.SpawnFromNavNode(this); // ✅ Pass this instance
-            Debug.Log($"[NavNode] Spawned world node from {name}");
+            EnsureBidirectionalConnections();
         }
-
     }
 
     private void OnEnable()
@@ -74,7 +61,7 @@ public class NavNode : MonoBehaviour
 #if UNITY_EDITOR
         if (!Application.isPlaying)
         {
-            UseManualConnections(); // Always refresh in editor
+            UseManualConnections();
         }
 #endif
     }
@@ -88,6 +75,7 @@ public class NavNode : MonoBehaviour
         }
 #endif
     }
+
     private void UpdateEditVisual()
     {
         if (nodeVisual != null)
@@ -105,9 +93,8 @@ public class NavNode : MonoBehaviour
         }
 
         if (pokeInteractionObject != null)
-            pokeInteractionObject.SetActive(isEditMode); // ✅ Hide when not editing
+            pokeInteractionObject.SetActive(isEditMode);
     }
-
 
 #if UNITY_EDITOR
     private void OnValidate()
@@ -120,6 +107,8 @@ public class NavNode : MonoBehaviour
     {
         connections = new List<NavEdge>();
 
+        if (nodeType == NodeType.Marker) return; // 🚫 Marker nodes have no connections
+
         foreach (var edge in manualConnections)
         {
             if (edge?.target == null || edge.target == this) continue;
@@ -128,18 +117,19 @@ public class NavNode : MonoBehaviour
             connections.Add(edge);
         }
     }
+
     public void AddBidirectionalConnection(NavNode other)
     {
+        if (nodeType == NodeType.Marker || other.nodeType == NodeType.Marker) return;
+
         if (other == null || other == this) return;
 
         float distance = Vector3.Distance(transform.position, other.transform.position);
 
-        // Add to this node
         var toOther = new NavEdge(other, distance);
         if (!manualConnections.Exists(e => e.target == other))
             manualConnections.Add(toOther);
 
-        // Add to other node
         var backToThis = new NavEdge(this, distance);
         if (!other.manualConnections.Exists(e => e.target == this))
             other.manualConnections.Add(backToThis);
@@ -147,13 +137,15 @@ public class NavNode : MonoBehaviour
 
     public void EnsureBidirectionalConnections()
     {
+        if (nodeType == NodeType.Marker) return;
+
         foreach (var edge in manualConnections)
         {
             if (edge == null || edge.target == null || edge.target == this) continue;
 
             var targetNode = edge.target;
+            if (targetNode.nodeType == NodeType.Marker) continue;
 
-            // If target node doesn't already link back
             bool alreadyLinkedBack = targetNode.manualConnections.Exists(e => e.target == this);
 
             if (!alreadyLinkedBack)
@@ -161,39 +153,58 @@ public class NavNode : MonoBehaviour
                 float distance = Vector3.Distance(transform.position, targetNode.transform.position);
                 targetNode.manualConnections.Add(new NavEdge(this, distance));
 #if UNITY_EDITOR
-                Debug.Log($"[NavNode] Auto-linked back from {targetNode.name} to {name}");  
+                Debug.Log($"[NavNode] Auto-linked back from {targetNode.name} to {name}");
 #endif
             }
         }
     }
-
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = nodeType == NodeType.Attraction ? Color.cyan : Color.yellow;
+        // 🎨 Gizmo color based on node type
+        if (nodeType == NodeType.Attraction)
+            Gizmos.color = Color.cyan;
+        else if (nodeType == NodeType.Marker)
+            Gizmos.color = Color.blue;
+        else
+            Gizmos.color = Color.yellow;
+
         Gizmos.DrawSphere(transform.position, gizmoRadius);
 
-        // Draw connections
-        Gizmos.color = Color.white;
-        foreach (var edge in connections)
+        // 📏 Draw connections (skip for Marker)
+        if (nodeType != NodeType.Marker)
         {
-            if (edge != null && edge.target != null)
+            Gizmos.color = Color.white;
+            foreach (var edge in connections)
             {
-                Gizmos.DrawLine(transform.position, edge.target.transform.position);
+                if (edge != null && edge.target != null)
+                {
+                    Gizmos.DrawLine(transform.position, edge.target.transform.position);
+                }
             }
         }
 
+        // ➤ Forward arrow for Marker node
+        if (nodeType == NodeType.Marker)
+        {
+            Gizmos.color = Color.blue;
+            Vector3 forward = transform.forward * 0.5f;
+            Gizmos.DrawLine(transform.position, transform.position + forward);
+            Gizmos.DrawSphere(transform.position + forward, 0.03f);
+        }
+
 #if UNITY_EDITOR
-        // Draw node ID label
         UnityEditor.Handles.color = Color.white;
-        UnityEditor.Handles.Label(
-            transform.position + Vector3.up * (gizmoRadius + 0.01f),
-            nodeID
-        );
+        UnityEditor.Handles.Label(transform.position + Vector3.up * (gizmoRadius + 0.01f), nodeID);
 #endif
     }
 
-  
-
-
+    public void SpawnWorldNode()
+    {
+        if (spawner != null)
+        {
+            spawner.SpawnFromNavNode(this);
+            Debug.Log($"[NavNode] Spawned world node from {name}");
+        }
+    }
 }

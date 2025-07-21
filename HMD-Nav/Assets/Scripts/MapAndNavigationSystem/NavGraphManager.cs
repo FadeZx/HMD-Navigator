@@ -45,6 +45,16 @@ public class NavGraphManager : MonoBehaviour
     }
 
 
+    public NavNode GetNodeByID(string id)
+    {
+        if (allNodes == null || allNodes.Count == 0)
+        {
+            Debug.LogWarning("[NavGraphManager] No nodes loaded in allNodes!");
+            return null;
+        }
+
+        return allNodes.FirstOrDefault(n => n != null && n.nodeID == id);
+    }
 
     public float GetPathWeight(List<NavNode> path)
     {

@@ -50,6 +50,8 @@ public class NavigationPopup : MonoBehaviour
 
     public void SetDestination(NavNode destination)
     {
+
+        pendingDestination = destination;
         // ✅ FIX: Ensure these are assigned
         mapUnitsPerMeter = NavConfig.Instance.mapUnitsPerMeter;
         walkSpeedMetersPerSecond = NavConfig.Instance.walkSpeed;
@@ -106,6 +108,37 @@ public class NavigationPopup : MonoBehaviour
 
     }
 
+    public void SnapMapToScannedMarker(string markerNodeID, Vector3 scannedWorldPosition, Quaternion scannedWorldRotation)
+    {
+        NavNode markerNode = navGraph.GetNodeByID(markerNodeID);
+
+        if (markerNode == null || markerNode.nodeType != NodeType.Marker)
+        {
+            Debug.LogWarning($"[NavigationPopup] No valid marker node found for ID: {markerNodeID}");
+            return;
+        }
+
+        // Step 1: Get original marker world pose (before scanning)
+        Vector3 originalMarkerPos = markerNode.transform.position;
+        Quaternion originalMarkerRot = markerNode.transform.rotation;
+
+        // Step 2: Calculate rotation and position offset
+        Quaternion rotationOffset = scannedWorldRotation * Quaternion.Inverse(originalMarkerRot);
+        Vector3 positionOffset = scannedWorldPosition - (rotationOffset * originalMarkerPos);
+
+        Debug.Log($"📍 Aligning map to marker. Offset Pos: {positionOffset}, Offset Rot: {rotationOffset.eulerAngles}");
+
+        // Step 3: Apply to map root
+        mapRootTransform.rotation = rotationOffset * mapRootTransform.rotation;
+        mapRootTransform.position = rotationOffset * mapRootTransform.position + positionOffset;
+
+        // Step 4: Optional - re-align visualizers
+        visualizer.ClearPath();
+        userVisualizer.ClearPath();
+
+        Debug.Log("[NavigationPopup] 🧭 Map and nodes aligned to scanned marker.");
+    }
+
     public void ConfirmNavigation()
     {
         if (pendingDestination == null)
@@ -132,9 +165,9 @@ public class NavigationPopup : MonoBehaviour
             //mapController.ToggleMap();
         currentWorldPath = navGraph.FindPath(startNode, pendingDestination);
         navigationUpdater.BeginPathProgression(
-    currentWorldPath,
-    userVisualizer.GetWorldPathPoints()
-);
+        currentWorldPath,
+        userVisualizer.GetWorldPathPoints()
+    );
 
     }
 
