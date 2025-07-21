@@ -14,13 +14,23 @@ public class QRCodeTracker : MonoBehaviour
         public Vector3 toMarker;        // Vector from camera to marker
         public Vector3 markerForward;   // Marker’s forward vector
         public float distance;
+        public float angleToUser;        // same as markerInfo.GetAngleToTarget()
+        public float viewAngleFromUser;  // same as markerInfo.GetViewAngleFromTarget()
 
-        public CalibrationInfo(string qrText, Vector3 toMarker, Vector3 markerForward, float distance)
+        public CalibrationInfo(
+       string qrText,
+       Vector3 toMarker,
+       Vector3 markerForward,
+       float distance,
+       float angleToUser,
+       float viewAngleFromUser)
         {
             this.qrText = qrText;
             this.toMarker = toMarker;
             this.markerForward = markerForward;
             this.distance = distance;
+            this.angleToUser = angleToUser;
+            this.viewAngleFromUser = viewAngleFromUser;
         }
     }
 
@@ -144,24 +154,24 @@ public class QRCodeTracker : MonoBehaviour
         Vector3 markerForward = closestMarker.rotation * Vector3.forward;
         float distance = Vector3.Distance(_camera.transform.position, closestMarker.position);
 
+        float angleToUser = closestMarker.GetAngleToTarget(_camera.transform);
+        float viewAngleFromUser = closestMarker.GetViewAngleFromTarget(_camera.transform);
+
         info = new CalibrationInfo(
             closestMarker.qrText,
             toMarker,
             markerForward,
-            distance
+            distance,
+            angleToUser,
+            viewAngleFromUser
         );
 
         return true;
+
     }
 
-//    if (QRCodeTracker.Instance.TryGetCalibrationInfo(out var info))
-//     {
-//        Debug.Log($"[Calibration] Marker: {info.qrText} | Dist: {info.distance:F2}m");
-//        Debug.DrawRay(Camera.main.transform.position, info.toMarker, Color.green);
-//        Debug.DrawRay(Camera.main.transform.position + info.toMarker* info.distance, info.markerForward, Color.red);
-//    }
 
-public MarkerInfo GetMarker(string qrText)
+    public MarkerInfo GetMarker(string qrText)
     {
         _markers.TryGetValue(qrText, out var info);
         return info;
